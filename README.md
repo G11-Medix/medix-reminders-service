@@ -31,6 +31,8 @@ npm install
 
 ## Ejecutar
 
+
+
 ```bash
 cd ../app-reminder
 ```
@@ -39,4 +41,9 @@ cd ../app-reminder
 npx ts-node-dev src/server.ts
 ```
 
+En dasarollo se debe usar NGrock y cambiar el cron en Supabase con la nueva direccion: 
+
+```bash
+ngrok http 3000
+```
 
