@@ -32,7 +32,7 @@ npm install
 ## Ejecutar
 
 ```bash
-cd Reminders/app-reminder
+cd ../app-reminder
 ```
 
 ```bash
