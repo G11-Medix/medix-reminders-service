@@ -1,12 +1,5 @@
 # REMINDERS - Backend de Notificaciones
 
-Backend en Node.js + TypeScript para envío de notificaciones:
-
-- WhatsApp (Twilio)
-- Push Notifications (Firebase)
-- Integración con Supabase
-
----
 
 ## Tecnologías
 
@@ -38,14 +31,12 @@ npm install
 
 ## Ejecutar
 
-Desarrollo:
+```bash
+cd Reminders/app-reminder
+```
+
 ```bash
 npx ts-node-dev src/server.ts
 ```
 
-Producción:
-```bash
-npm run build
-node dist/server.js
-```
 
