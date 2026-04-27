@@ -1,21 +1,37 @@
-# Seguridad
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+
+# Env files
 .env
+.env.local
+.env.production
 
-# Python (Compilados y caché)
-__pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
-.python-version
+# Firebase service account 
+serviceAccount.json
 
-# Entornos virtuales
-venv/
-.venv/
-env/
+# Logs
+logs/
+*.log
+npm-debug.log*
 
-# IDEs y Editores
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker
+docker-compose.override.yml
+
+# IDEs
 .vscode/
 .idea/
 
-# Docker
-*.log
+# Testing
+coverage/
+

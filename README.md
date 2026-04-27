@@ -1,45 +1,51 @@
-# Medix Notification Service – Setup
+# REMINDERS - Backend de Notificaciones
 
-## Requisitos
+Backend en Node.js + TypeScript para envío de notificaciones:
 
-* Python 3.10 o superior
-* pip
-
----
-
-## 1. Crear entorno virtual
-
-```bash
-python3 -m venv venv
-```
-
-### Activar entorno
-
-**Linux / Mac**
-
-```bash
-source venv/bin/activate
-```
-
-**Windows**
-
-```bash
-venv\Scripts\activate
-```
+- WhatsApp (Twilio)
+- Push Notifications (Firebase)
+- Integración con Supabase
 
 ---
 
-## 2. Instalar dependencias
+## Tecnologías
 
+- Node.js
+- TypeScript
+- Express
+- Supabase
+- Twilio
+- Firebase
+
+---
+
+
+## Instalación
+
+1. Clonar repo:
 ```bash
-pip install fastapi uvicorn requests apscheduler python-dotenv
+git clone <repo>
+cd REMINDERS
+```
+
+2. Instalar dependencias:
+```bash
+npm install
 ```
 
 ---
 
-## 3. Ejecutar el servidor
 
+## Ejecutar
+
+Desarrollo:
 ```bash
-uvicorn app.main:app --reload
+npx ts-node-dev src/server.ts
+```
+
+Producción:
+```bash
+npm run build
+node dist/server.js
 ```
 
