@@ -13,6 +13,7 @@ function hoursDiff(date: Date) {
 
 function formatDate(date: Date) {
   return date.toLocaleDateString("es-CO", {
+    timeZone: "America/Bogota",
     day: "numeric",
     month: "long"
   });
@@ -20,10 +21,12 @@ function formatDate(date: Date) {
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString("es-CO", {
+    timeZone: "America/Bogota",
     hour: "2-digit",
     minute: "2-digit"
   });
 }
+
 
 function formatRemainingTime(date: Date) {
   const now = new Date();
