@@ -1,5 +1,0 @@
-// llama tu backend
-
-await fetch("https://tu-backend.com/api/v1/process-reminders", {
-  method: "POST",
-});
