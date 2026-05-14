@@ -34,12 +34,12 @@ export async function processReminders() {
 
       const token = jwt.sign(
         {
-          jti: crypto.randomUUID(),
-          action: "cancel_cita",
-          citaId: cita.id,
-          institutionId: cita.id_institucion,
-          numeroDocumento: cita.numero_documento,
-          tipoDocumento: cita.tipo_documento
+        jti: crypto.randomUUID(),
+        action: "cancel_cita",
+        citaId: cita.id_cita,
+        institutionId: cita.id_institucion,
+        numeroDocumento: cita.numero_documento,
+        tipoDocumento: cita.tipo_documento
         },
         config.jwtSecret,
         { expiresIn: "5m", issuer: "medix" }
