@@ -46,7 +46,7 @@ export async function processReminders() {
       );
 
       const cancelLink =
-        `${config.magicLinkBaseUrl}/magic/cancel-page?token=${token}`;
+        `${config.magicLinkBaseUrl}/magic/cancel-cita?token=${token}`;
 
       const [institucionNombre, especialidadNombre, tokens, recs] =
         await Promise.all([
