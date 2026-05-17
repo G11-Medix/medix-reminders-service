@@ -81,14 +81,19 @@ ${cancelLink}
 
 Este enlace expira en 5 minutos.`;
 
+      const mensajefirebase =
+`Medix - Recordatorio de cita
+Fecha: ${fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" })}
+Hora: ${fecha.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`;
+
       if (cita.telefono) {
         await sendWhatsApp(cita.telefono, mensaje);
       }
-      /*
+      
       if (tokens?.length) {
-        await sendPush(tokens, mensaje);
+        await sendPush(tokens, mensajefirebase);
       }
-      */
+      
       await markAsSent(cita.id, cita.type);
 
       console.log(`✔ Enviado ${cita.type} → cita ${cita.id}`);
