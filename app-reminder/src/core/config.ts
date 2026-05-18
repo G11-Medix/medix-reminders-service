@@ -12,4 +12,6 @@ export const config = {
   twilioWhatsapp: process.env.TWILIO_WHATSAPP!,
 
   apiKey: process.env.API_KEY!,
+  jwtSecret: process.env.JWT_SECRET!,
+  magicLinkBaseUrl: process.env.MAGIC_LINK_BASE_URL!
 };

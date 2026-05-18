@@ -1,115 +1,104 @@
-import { getPendingNotifications, markAsSent } from "../repositories/notification.repository";
-import { getTokensByUser } from "../repositories/device.repository";
-import { getRecommendations } from "../repositories/recommendation.repository";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+
+import { supabase } from "../db/supabase.client";
+
 import { getInstitutionById } from "../repositories/institution.repository";
 import { getSpecialtyById } from "../repositories/specialty.repository";
+import { getRecommendations } from "../repositories/recommendation.repository";
+import { getTokensByUser } from "../repositories/device.repository";
+
 import { sendWhatsApp } from "./whatsapp.service";
 import { sendPush } from "./push.service";
 
-function hoursDiff(date: Date) {
-  const now = new Date();
-  return (date.getTime() - now.getTime()) / (1000 * 60 * 60);
-}
-
-function formatDate(date: Date) {
-  return date.toLocaleDateString("es-CO", {
-    timeZone: "America/Bogota",
-    day: "numeric",
-    month: "long"
-  });
-}
-
-function formatTime(date: Date) {
-  return date.toLocaleTimeString("es-CO", {
-    timeZone: "America/Bogota",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-}
-
-
-function formatRemainingTime(date: Date) {
-  const now = new Date();
-  const diffMs = date.getTime() - now.getTime();
-
-  const totalMinutes = Math.floor(diffMs / (1000 * 60));
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  if (hours === 0) return `${minutes} minuto(s)`;
-  if (minutes === 0) return `${hours} hora(s)`;
-
-  return `${hours} hora(s) y ${minutes} minuto(s)`;
-}
+import { markAsSent } from "../repositories/notification.repository";
+import { config } from "../core/config";
 
 export async function processReminders() {
-  const citas = await getPendingNotifications();
+  const { data: citas, error } =
+    await supabase.rpc("get_due_notifications");
+
+  if (error) {
+    console.error("Supabase error:", error);
+    return;
+  }
+
+  if (!citas?.length) {
+    console.log("No hay recordatorios");
+    return;
+  }
 
   for (const cita of citas) {
-    if (!cita.fecha_cita) continue;
+    try {
+      const fecha = new Date(cita.fecha_cita);
 
-    const fecha = new Date(cita.fecha_cita);
-    const diff = hoursDiff(fecha);
+      const token = jwt.sign(
+        {
+        jti: crypto.randomUUID(),
+        action: "cancel_cita",
+        citaId: cita.id_cita,
+        institutionId: cita.id_institucion,
+        numeroDocumento: cita.numero_documento,
+        tipoDocumento: cita.tipo_documento
+        },
+        config.jwtSecret,
+        { expiresIn: "5m", issuer: "medix" }
+      );
 
-    let type: "24h" | "1h" | null = null;
+      const cancelLink =
+        `${config.magicLinkBaseUrl}/magic/cancel-cita?token=${token}`;
 
-    if (diff <= 24 && diff > 1 && !cita.recordatorio_24h_enviado) {
-      type = "24h";
-    }
+      const [institucionNombre, especialidadNombre, tokens, recs] =
+        await Promise.all([
+          getInstitutionById(cita.id_institucion),
+          getSpecialtyById(cita.id_especialidad),
+          getTokensByUser(cita.id_usuario),
+          getRecommendations(
+            cita.id_institucion,
+            cita.id_especialidad,
+            cita.codigo
+          )
+        ]);
 
-    if (diff <= 1 && diff > 0 && !cita.recordatorio_1h_enviado) {
-      type = "1h";
-    }
+      const recomendacionesTexto =
+        recs?.map(r => `- ${r.recomendaciones}`).join("\n") ||
+        "- Sin recomendaciones";
 
-    if (!type) continue;
-
-    // 🔹 traer datos correctamente
-    const institucionNombre = await getInstitutionById(cita.id_institucion);
-    const especialidadNombre = await getSpecialtyById(cita.id_especialidad);
-
-    const tokens = await getTokensByUser(cita.id_usuario);
-
-    const recs = await getRecommendations(
-      cita.id_institucion,
-      cita.id_especialidad,
-      cita.codigo
-    );
-
-    const recomendacionesTexto = recs
-      .map(r => `- ${r.recomendaciones}`)
-      .join("\n");
-
-    const tiempoRestante = formatRemainingTime(fecha);
-
-    // 🔥 MENSAJE LIMPIO (sin espacios raros)
-    const mensaje =
+      const mensaje =
 `Medix - Recordatorio de cita
 
-Estimado usuario,
+Fecha: ${fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" })}
+Hora: ${fecha.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
 
-Tiene una cita programada con la siguiente información:
-
-Fecha: ${formatDate(fecha)}
-Hora: ${formatTime(fecha)}
 Institución: ${institucionNombre || "No registrada"}
 Especialidad: ${especialidadNombre || "No registrada"}
 
-Tiempo restante: ${tiempoRestante}
-
 Recomendaciones:
-${recomendacionesTexto || "- Sin recomendaciones"}
+${recomendacionesTexto}
 
-Por favor, preséntese con anticipación.
-Puede gestionar sus citas desde la plataforma Medix.`;
+Cancelar cita:
+${cancelLink}
 
-    if (cita.telefono) {
-      await sendWhatsApp(cita.telefono, mensaje);
+Este enlace expira en 5 minutos.`;
+
+      const mensajefirebase =
+`Medix - Recordatorio de cita
+Fecha: ${fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" })}
+Hora: ${fecha.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`;
+
+      if (cita.telefono) {
+        await sendWhatsApp(cita.telefono, mensaje);
+      }
+      
+      if (tokens?.length) {
+        await sendPush(tokens, mensajefirebase);
+      }
+      
+      await markAsSent(cita.id, cita.type);
+
+      console.log(`✔ Enviado ${cita.type} → cita ${cita.id}`);
+    } catch (err) {
+      console.error(`Error en cita ${cita.id}`, err);
     }
-
-    await sendPush(tokens, mensaje);
-
-    await markAsSent(cita.id, type);
-
-    console.log(`✔ Notificación enviada (${type}) → ${cita.id}`);
   }
 }
