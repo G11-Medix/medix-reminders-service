@@ -32,6 +32,20 @@ export async function processReminders() {
     try {
       const fecha = new Date(cita.fecha_cita);
 
+      const fechaFormateada = fecha.toLocaleDateString("es-CO", {
+        timeZone: "UTC",
+        day: "numeric",
+        month: "long"
+      });
+
+      const horaFormateada = fecha.toLocaleTimeString("es-CO", {
+        timeZone: "UTC",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
+
+
       const token = jwt.sign(
         {
         jti: crypto.randomUUID(),
@@ -67,8 +81,8 @@ export async function processReminders() {
       const mensaje =
 `Medix - Recordatorio de cita
 
-Fecha: ${fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" })}
-Hora: ${fecha.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
+Fecha: ${fechaFormateada}
+Hora: ${horaFormateada}
 
 Institución: ${institucionNombre || "No registrada"}
 Especialidad: ${especialidadNombre || "No registrada"}
@@ -81,11 +95,20 @@ ${cancelLink}
 
 Este enlace expira en 5 minutos.`;
 
+
       const mensajefirebase =
 `Medix - Recordatorio de cita
-Fecha: ${fecha.toLocaleDateString("es-CO", { day: "numeric", month: "long" })}
-Hora: ${fecha.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}`;
 
+Fecha: ${fechaFormateada}
+Hora: ${horaFormateada}
+
+Institución: ${institucionNombre || "No registrada"}
+Especialidad: ${especialidadNombre || "No registrada"}
+
+Recomendaciones:
+${recomendacionesTexto}`;
+
+      
       if (cita.telefono) {
         await sendWhatsApp(cita.telefono, mensaje);
       }

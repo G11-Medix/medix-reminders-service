@@ -11,7 +11,7 @@ export async function sendPush(tokens: string[], message: string) {
         },
       });
     } catch (err) {
-      console.log("Token inválido:", token);
+      console.log("Token:", token);
     }
   }
 }
