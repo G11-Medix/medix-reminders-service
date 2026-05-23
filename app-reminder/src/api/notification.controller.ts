@@ -6,7 +6,6 @@ const router = Router();
 
 router.post("/process-reminders", async (req, res) => {
 
-  // 🔐 VALIDACIÓN AQUÍ
   if (req.headers["x-api-key"] !== config.apiKey) {
     return res.status(401).json({ error: "Unauthorized" });
   }
