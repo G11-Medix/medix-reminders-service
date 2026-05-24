@@ -4,12 +4,6 @@ Servicio backend orientado a la gestión de recordatorios dentro del ecosistema 
 
 ## Descripción general
 
-- Node.js
-- TypeScript
-- Express
-- Supabase
-- Twilio
-- Firebase
 
 El repositorio pertenece al sistema Medix y cumple el rol de microservicio backend para funcionalidades asociadas a recordatorios y control de acceso. El README previo del repositorio documenta integración con Supabase, validación de tokens Bearer, control de usuarios activos y auditoría de operaciones bajo rutas `/api/*`; sin embargo, parte de esa implementación no se encuentra completa en los archivos actuales y debe ser validada por el equipo de desarrollo.
 
